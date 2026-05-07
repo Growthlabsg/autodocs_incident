@@ -1,0 +1,788 @@
+{
+  "info": {
+    "name": "AutoDocs+AutoIncident API",
+    "description": "Complete API collection for AutoDocs+AutoIncident platform. Import this collection into Postman to test all 100+ endpoints.",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.autodocs.com",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "incident_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "team_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', jsonData.token);",
+                  "    pm.collectionVariables.set('user_id', jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@company.com\",\n  \"password\": \"your_password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login and get JWT token. The token will be automatically saved to collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "refresh"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SSO Login",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/saml/login?org_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "saml", "login"],
+              "query": [
+                {
+                  "key": "org_id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Incidents",
+      "item": [
+        {
+          "name": "List Incidents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/incidents?severity=SEV1&status=investigating&page=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents"],
+              "query": [
+                {
+                  "key": "severity",
+                  "value": "SEV1",
+                  "description": "Filter by severity: SEV1, SEV2, SEV3, SEV4"
+                },
+                {
+                  "key": "status",
+                  "value": "investigating",
+                  "description": "Filter by status"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Incident",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('incident_id', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Production Database Connection Issues\",\n  \"description\": \"Users experiencing timeout errors when connecting to the database\",\n  \"severity\": \"SEV1\",\n  \"service_id\": 10,\n  \"team_id\": 2,\n  \"assignee_ids\": [5, 8],\n  \"tags\": [\"database\", \"connection\", \"timeout\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/incidents",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Incident",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/incidents/{{incident_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents", "{{incident_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Incident",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"monitoring\",\n  \"severity\": \"SEV2\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/incidents/{{incident_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents", "{{incident_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Post Incident Update",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Root cause identified. Deploying fix now.\",\n  \"notify_channels\": [\"slack\", \"email\"],\n  \"status\": \"identified\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/incidents/{{incident_id}}/updates",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents", "{{incident_id}}", "updates"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resolve Incident",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resolution_summary\": \"Fixed by rolling back to previous version\",\n  \"root_cause\": \"Bug in latest deployment\",\n  \"generate_postmortem\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/incidents/{{incident_id}}/resolve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents", "{{incident_id}}", "resolve"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AI Classify Incident",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/incidents/{{incident_id}}/classify",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents", "{{incident_id}}", "classify"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Post-Mortem",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/incidents/{{incident_id}}/postmortem/generate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents", "{{incident_id}}", "postmortem", "generate"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Incident Roles",
+      "item": [
+        {
+          "name": "Assign Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 5,\n  \"role\": \"incident_commander\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/incidents/{{incident_id}}/roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents", "{{incident_id}}", "roles"]
+            },
+            "description": "Roles: incident_commander, tech_lead, comms_lead, scribe"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Incident Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/incidents/{{incident_id}}/roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents", "{{incident_id}}", "roles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Auto-Assign Roles",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/incidents/{{incident_id}}/roles/auto-assign",
+              "host": ["{{base_url}}"],
+              "path": ["api", "incidents", "{{incident_id}}", "roles", "auto-assign"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Status Pages",
+      "item": [
+        {
+          "name": "List Status Pages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/status-pages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status-pages"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Status Page",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Public Status\",\n  \"subdomain\": \"status\",\n  \"type\": \"public\",\n  \"custom_domain\": \"status.company.com\",\n  \"branding\": {\n    \"logo_url\": \"https://company.com/logo.png\",\n    \"primary_color\": \"#14b8a6\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/status-pages/advanced",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status-pages", "advanced"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Component",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"API Server\",\n  \"description\": \"Main REST API\",\n  \"status\": \"operational\",\n  \"group\": \"Core Services\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/status-pages/1/components",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status-pages", "1", "components"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Component Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"degraded\",\n  \"message\": \"Experiencing increased latency\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/status-pages/components/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status-pages", "components", "1", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subscribe to Status Page",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@company.com\",\n  \"notification_type\": \"email\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/status-pages/1/subscribe",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status-pages", "1", "subscribe"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Custom Fields",
+      "item": [
+        {
+          "name": "Define Field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"field_name\": \"Affected Region\",\n  \"field_key\": \"affected_region\",\n  \"field_type\": \"select\",\n  \"options\": [\"US-East\", \"US-West\", \"EU\", \"Asia-Pacific\"],\n  \"is_required\": false,\n  \"applies_to\": \"incident\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/custom-fields/define",
+              "host": ["{{base_url}}"],
+              "path": ["api", "custom-fields", "define"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Field Value",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"field_key\": \"affected_region\",\n  \"value\": \"US-East\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/custom-fields/incident/{{incident_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "custom-fields", "incident", "{{incident_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Common Fields",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/custom-fields/common/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "custom-fields", "common", "create"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Alert Routing",
+      "item": [
+        {
+          "name": "Create Routing Rule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Critical Datadog Alerts\",\n  \"priority\": 10,\n  \"conditions\": {\n    \"operator\": \"AND\",\n    \"rules\": [\n      {\n        \"field\": \"source\",\n        \"operator\": \"equals\",\n        \"value\": \"datadog\"\n      },\n      {\n        \"field\": \"severity\",\n        \"operator\": \"equals\",\n        \"value\": \"critical\"\n      }\n    ]\n  },\n  \"actions\": [\n    {\n      \"type\": \"create_incident\",\n      \"config\": {\n        \"severity\": \"SEV2\"\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/alert-routing/rules",
+              "host": ["{{base_url}}"],
+              "path": ["api", "alert-routing", "rules"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Process Alert (Webhook)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"datadog\",\n  \"title\": \"High CPU Usage\",\n  \"body\": \"CPU at 95% for 5 minutes\",\n  \"severity\": \"critical\",\n  \"metadata\": {\n    \"host\": \"prod-web-01\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/alerts/webhook",
+              "host": ["{{base_url}}"],
+              "path": ["api", "alerts", "webhook"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Alert Sources",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/alert-routing/sources",
+              "host": ["{{base_url}}"],
+              "path": ["api", "alert-routing", "sources"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "On-Call",
+      "item": [
+        {
+          "name": "Get Current On-Call",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/oncall/current",
+              "host": ["{{base_url}}"],
+              "path": ["api", "oncall", "current"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Request Shift Swap",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shift_id\": 150,\n  \"to_user_id\": 8,\n  \"reason\": \"Family emergency\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/oncall/shift-swaps",
+              "host": ["{{base_url}}"],
+              "path": ["api", "oncall", "shift-swaps"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Calculate Pay",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/oncall/pay-calculator?start_date=2024-04-01&end_date=2024-05-01",
+              "host": ["{{base_url}}"],
+              "path": ["api", "oncall", "pay-calculator"],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2024-04-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2024-05-01"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get On-Call Burden",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/oncall/teams/{{team_id}}/burden?days=30",
+              "host": ["{{base_url}}"],
+              "path": ["api", "oncall", "teams", "{{team_id}}", "burden"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Executive Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/executive?start_date=2024-04-01&end_date=2024-05-01",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analytics", "executive"],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2024-04-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2024-05-01"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "MTTR Trends",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/mttr",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analytics", "mttr"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "List Teams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/teams",
+              "host": ["{{base_url}}"],
+              "path": ["api", "teams"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Team",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Backend Team\",\n  \"description\": \"Backend services\",\n  \"slack_channel\": \"#backend\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/teams",
+              "host": ["{{base_url}}"],
+              "path": ["api", "teams"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "List Services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/services",
+              "host": ["{{base_url}}"],
+              "path": ["api", "services"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/services/10/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "services", "10", "health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

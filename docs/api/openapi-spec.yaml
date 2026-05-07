@@ -1,0 +1,655 @@
+openapi: 3.0.3
+info:
+  title: AutoDocs+AutoIncident API
+  description: |
+    Complete API for AutoDocs+AutoIncident incident management platform.
+    
+    ## Features
+    - 100+ endpoints
+    - JWT authentication
+    - Rate limiting
+    - Webhooks
+    - Real-time updates
+    
+    ## Base URL
+    `https://api.autodocs.com`
+    
+  version: 1.0.0
+  contact:
+    email: api-support@autodocs.com
+  license:
+    name: Proprietary
+    
+servers:
+  - url: https://api.autodocs.com
+    description: Production server
+  - url: https://staging-api.autodocs.com
+    description: Staging server
+    
+security:
+  - bearerAuth: []
+  - apiKey: []
+
+tags:
+  - name: Authentication
+    description: Login and token management
+  - name: Incidents
+    description: Incident management operations
+  - name: Incident Roles
+    description: Incident role assignments
+  - name: Teams
+    description: Team management
+  - name: Services
+    description: Service catalog
+  - name: On-Call
+    description: On-call schedule management
+  - name: Status Pages
+    description: Status page operations
+  - name: Custom Fields
+    description: Custom field definitions
+  - name: Alert Routing
+    description: Alert routing rules
+  - name: Analytics
+    description: Analytics and reporting
+  - name: Workflows
+    description: Workflow automation
+
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login and get JWT token
+      description: Authenticate with email and password to receive a JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@company.com
+                password:
+                  type: string
+                  format: password
+                  example: your_password
+      responses:
+        '200':
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refresh_token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security: []
+
+  /api/incidents:
+    get:
+      tags:
+        - Incidents
+      summary: List incidents
+      description: Get a paginated list of incidents with optional filters
+      parameters:
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [SEV1, SEV2, SEV3, SEV4]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [investigating, identified, monitoring, resolved]
+        - name: team_id
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  incidents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Incident'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+    
+    post:
+      tags:
+        - Incidents
+      summary: Create incident
+      description: Create a new incident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIncidentRequest'
+      responses:
+        '201':
+          description: Incident created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/incidents/{id}:
+    get:
+      tags:
+        - Incidents
+      summary: Get incident
+      description: Get detailed information about a specific incident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentDetail'
+        '404':
+          description: Incident not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    patch:
+      tags:
+        - Incidents
+      summary: Update incident
+      description: Update an existing incident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIncidentRequest'
+      responses:
+        '200':
+          description: Incident updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+
+  /api/incidents/{id}/roles:
+    get:
+      tags:
+        - Incident Roles
+      summary: Get incident roles
+      description: Get all role assignments for an incident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IncidentRole'
+    
+    post:
+      tags:
+        - Incident Roles
+      summary: Assign role
+      description: Assign a role to a user for an incident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - role
+              properties:
+                user_id:
+                  type: integer
+                role:
+                  type: string
+                  enum: [incident_commander, tech_lead, comms_lead, scribe]
+      responses:
+        '200':
+          description: Role assigned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentRole'
+
+  /api/status-pages:
+    get:
+      tags:
+        - Status Pages
+      summary: List status pages
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_pages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StatusPage'
+
+  /api/status-pages/advanced:
+    post:
+      tags:
+        - Status Pages
+      summary: Create status page
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStatusPageRequest'
+      responses:
+        '201':
+          description: Status page created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusPage'
+
+  /api/oncall/current:
+    get:
+      tags:
+        - On-Call
+      summary: Get current on-call
+      description: Get list of users currently on-call
+      parameters:
+        - name: team_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  oncall:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OnCallInfo'
+
+  /api/analytics/executive:
+    get:
+      tags:
+        - Analytics
+      summary: Executive dashboard
+      description: Get executive-level metrics and KPIs
+      parameters:
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutiveDashboard'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        role:
+          type: string
+          enum: [admin, engineer, viewer]
+
+    Incident:
+      type: object
+      properties:
+        id:
+          type: integer
+        incident_number:
+          type: string
+          example: INC-2024-0123
+        title:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [SEV1, SEV2, SEV3, SEV4]
+        status:
+          type: string
+          enum: [investigating, identified, monitoring, resolved]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+        assignees:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        team:
+          $ref: '#/components/schemas/Team'
+        service:
+          $ref: '#/components/schemas/Service'
+
+    IncidentDetail:
+      allOf:
+        - $ref: '#/components/schemas/Incident'
+        - type: object
+          properties:
+            timeline:
+              type: array
+              items:
+                $ref: '#/components/schemas/TimelineEvent'
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/IncidentRole'
+            custom_fields:
+              type: object
+              additionalProperties: true
+
+    CreateIncidentRequest:
+      type: object
+      required:
+        - title
+        - severity
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [SEV1, SEV2, SEV3, SEV4]
+        service_id:
+          type: integer
+        team_id:
+          type: integer
+        assignee_ids:
+          type: array
+          items:
+            type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        is_private:
+          type: boolean
+          default: false
+
+    UpdateIncidentRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [investigating, identified, monitoring, resolved]
+        severity:
+          type: string
+          enum: [SEV1, SEV2, SEV3, SEV4]
+        description:
+          type: string
+
+    IncidentRole:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [incident_commander, tech_lead, comms_lead, scribe]
+        user:
+          $ref: '#/components/schemas/User'
+        assigned_at:
+          type: string
+          format: date-time
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        slack_channel:
+          type: string
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [operational, degraded, partial_outage, major_outage]
+        tier:
+          type: integer
+          enum: [1, 2, 3]
+
+    StatusPage:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        subdomain:
+          type: string
+        type:
+          type: string
+          enum: [public, private, internal]
+        custom_domain:
+          type: string
+          nullable: true
+
+    CreateStatusPageRequest:
+      type: object
+      required:
+        - name
+        - subdomain
+      properties:
+        name:
+          type: string
+        subdomain:
+          type: string
+        type:
+          type: string
+          enum: [public, private, internal]
+          default: public
+        custom_domain:
+          type: string
+        branding:
+          type: object
+          properties:
+            logo_url:
+              type: string
+            primary_color:
+              type: string
+
+    OnCallInfo:
+      type: object
+      properties:
+        team:
+          $ref: '#/components/schemas/Team'
+        user:
+          $ref: '#/components/schemas/User'
+        shift:
+          type: object
+          properties:
+            id:
+              type: integer
+            start_time:
+              type: string
+              format: date-time
+            end_time:
+              type: string
+              format: date-time
+
+    ExecutiveDashboard:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        metrics:
+          type: object
+          properties:
+            total_incidents:
+              type: integer
+            avg_mttr_minutes:
+              type: number
+            sla_compliance:
+              type: number
+
+    TimelineEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        event_type:
+          type: string
+        message:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+        created_at:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
