@@ -1,0 +1,385 @@
+/* Apple-Inspired Global Styles */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Root variables */
+  :root {
+    /* Colors */
+    --color-bg-primary: #FFFFFF;
+    --color-bg-secondary: #F5F5F7;
+    --color-bg-tertiary: #E8E8ED;
+    
+    --color-text-primary: #1D1D1F;
+    --color-text-secondary: #86868B;
+    --color-text-tertiary: #D2D2D7;
+    
+    --color-blue: #007AFF;
+    --color-green: #34C759;
+    --color-orange: #FF9500;
+    --color-red: #FF3B30;
+    --color-purple: #5856D6;
+    --color-yellow: #FFCC00;
+    
+    /* Shadows */
+    --shadow-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 4px 16px 0 rgba(0, 0, 0, 0.12);
+    --shadow-high: 0 12px 48px 0 rgba(0, 0, 0, 0.16);
+    
+    /* Border radius */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+  }
+  
+  /* Dark mode */
+  .dark {
+    --color-bg-primary: #000000;
+    --color-bg-secondary: #1C1C1E;
+    --color-bg-tertiary: #2C2C2E;
+    
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #98989D;
+    --color-text-tertiary: #48484A;
+  }
+  
+  /* Base typography */
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  body {
+    @apply bg-apple-bg-primary text-apple-text-primary;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 
+                 'Helvetica Neue', 'Segoe UI', 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  
+  /* Headings */
+  h1 {
+    @apply text-h1 text-apple-text-primary;
+  }
+  
+  h2 {
+    @apply text-h2 text-apple-text-primary;
+  }
+  
+  h3 {
+    @apply text-h3 text-apple-text-primary;
+  }
+  
+  h4 {
+    @apply text-h4 text-apple-text-primary;
+  }
+  
+  /* Links */
+  a {
+    @apply text-apple-blue no-underline;
+    transition: opacity 150ms ease;
+  }
+  
+  a:hover {
+    @apply opacity-80;
+  }
+  
+  /* Focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-apple-blue ring-offset-2;
+  }
+}
+
+@layer components {
+  /* Button Components */
+  .btn {
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-normal;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply btn bg-apple-blue text-white;
+    @apply hover:opacity-90 active:scale-98;
+    @apply focus:ring-apple-blue;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-apple-bg-secondary text-apple-text-primary;
+    @apply hover:bg-apple-bg-tertiary active:scale-98;
+    @apply focus:ring-apple-text-tertiary;
+  }
+  
+  .btn-tertiary {
+    @apply btn bg-transparent text-apple-blue;
+    @apply hover:bg-apple-bg-secondary active:scale-98;
+    @apply focus:ring-apple-blue;
+  }
+  
+  .btn-danger {
+    @apply btn bg-apple-red text-white;
+    @apply hover:opacity-90 active:scale-98;
+    @apply focus:ring-apple-red;
+  }
+  
+  /* Card Components */
+  .card {
+    @apply bg-white rounded-xl p-6 shadow-subtle;
+    @apply transition-all duration-normal;
+  }
+  
+  .card-hover {
+    @apply card hover:shadow-card-hover hover:-translate-y-1;
+  }
+  
+  .card-interactive {
+    @apply card-hover cursor-pointer;
+    @apply active:scale-98;
+  }
+  
+  /* Input Components */
+  .input {
+    @apply w-full px-4 py-3 rounded-lg border border-apple-bg-tertiary;
+    @apply bg-white text-apple-text-primary;
+    @apply transition-all duration-fast;
+    @apply focus:outline-none focus:ring-2 focus:ring-apple-blue focus:border-apple-blue;
+    @apply placeholder:text-apple-text-tertiary;
+  }
+  
+  .input-error {
+    @apply input border-apple-red focus:ring-apple-red focus:border-apple-red;
+  }
+  
+  /* Badge Components */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full;
+    @apply text-body-sm font-semibold;
+  }
+  
+  .badge-sev1 {
+    @apply badge bg-apple-sev1 text-white;
+  }
+  
+  .badge-sev2 {
+    @apply badge bg-apple-sev2 text-white;
+  }
+  
+  .badge-sev3 {
+    @apply badge bg-apple-sev3 text-apple-text-primary;
+  }
+  
+  .badge-sev4 {
+    @apply badge bg-apple-sev4 text-white;
+  }
+  
+  .badge-success {
+    @apply badge bg-apple-green text-white;
+  }
+  
+  .badge-warning {
+    @apply badge bg-apple-orange text-white;
+  }
+  
+  .badge-error {
+    @apply badge bg-apple-red text-white;
+  }
+  
+  .badge-info {
+    @apply badge bg-apple-purple text-white;
+  }
+  
+  /* Table Components */
+  .table {
+    @apply w-full;
+  }
+  
+  .table-header {
+    @apply bg-apple-bg-secondary text-apple-text-secondary;
+    @apply text-body-sm font-semibold uppercase tracking-wide;
+  }
+  
+  .table-row {
+    @apply border-b border-apple-bg-tertiary;
+    @apply transition-colors duration-fast;
+    @apply hover:bg-apple-bg-secondary;
+  }
+  
+  .table-cell {
+    @apply px-4 py-4 text-body;
+  }
+  
+  /* Status Indicators */
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+  
+  .status-operational {
+    @apply status-dot bg-apple-green;
+  }
+  
+  .status-degraded {
+    @apply status-dot bg-apple-orange;
+  }
+  
+  .status-outage {
+    @apply status-dot bg-apple-red;
+  }
+  
+  .status-maintenance {
+    @apply status-dot bg-apple-purple;
+  }
+  
+  /* Page Layouts */
+  .page-container {
+    @apply max-w-content mx-auto px-6 lg:px-12 py-8 lg:py-12;
+  }
+  
+  .page-header {
+    @apply mb-8 lg:mb-12;
+  }
+  
+  .page-title {
+    @apply text-h1 mb-2;
+  }
+  
+  .page-subtitle {
+    @apply text-body-lg text-apple-text-secondary;
+  }
+  
+  /* Section Layouts */
+  .section {
+    @apply mb-8 lg:mb-12;
+  }
+  
+  .section-title {
+    @apply text-h2 mb-4 lg:mb-6;
+  }
+  
+  /* Grid Layouts */
+  .grid-cards {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+  
+  .grid-metrics {
+    @apply grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6;
+  }
+  
+  /* Metric Cards */
+  .metric-card {
+    @apply card text-center;
+  }
+  
+  .metric-value {
+    @apply text-h1 text-apple-blue mb-1;
+  }
+  
+  .metric-label {
+    @apply text-body-sm text-apple-text-secondary uppercase tracking-wide;
+  }
+  
+  /* Loading States */
+  .loading-spinner {
+    @apply inline-block w-5 h-5 border-2 border-apple-blue border-t-transparent rounded-full;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Empty States */
+  .empty-state {
+    @apply text-center py-12;
+  }
+  
+  .empty-state-icon {
+    @apply text-6xl text-apple-text-tertiary mb-4;
+  }
+  
+  .empty-state-title {
+    @apply text-h3 text-apple-text-secondary mb-2;
+  }
+  
+  .empty-state-description {
+    @apply text-body text-apple-text-tertiary;
+  }
+  
+  /* Dividers */
+  .divider {
+    @apply border-t border-apple-bg-tertiary my-6;
+  }
+  
+  /* Navbar */
+  .navbar {
+    @apply bg-white/80 backdrop-blur-lg border-b border-apple-bg-tertiary;
+    @apply sticky top-0 z-50;
+  }
+  
+  .navbar-content {
+    @apply max-w-content mx-auto px-6 h-16 flex items-center justify-between;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    @apply w-64 bg-apple-bg-secondary border-r border-apple-bg-tertiary;
+    @apply h-screen sticky top-0 overflow-y-auto;
+  }
+  
+  .sidebar-link {
+    @apply flex items-center px-4 py-3 text-body;
+    @apply text-apple-text-primary rounded-lg mx-2 my-1;
+    @apply transition-colors duration-fast;
+    @apply hover:bg-apple-bg-tertiary;
+  }
+  
+  .sidebar-link-active {
+    @apply sidebar-link bg-apple-blue text-white;
+    @apply hover:bg-apple-blue hover:opacity-90;
+  }
+  
+  /* Modals */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/40 backdrop-blur-sm z-50;
+    @apply flex items-center justify-center p-6;
+  }
+  
+  .modal {
+    @apply bg-white rounded-2xl shadow-high;
+    @apply max-w-2xl w-full max-h-[90vh] overflow-y-auto;
+    @apply animate-scale-in;
+  }
+  
+  .modal-header {
+    @apply px-6 py-4 border-b border-apple-bg-tertiary;
+  }
+  
+  .modal-title {
+    @apply text-h3;
+  }
+  
+  .modal-content {
+    @apply px-6 py-6;
+  }
+  
+  .modal-footer {
+    @apply px-6 py-4 border-t border-apple-bg-tertiary;
+    @apply flex items-center justify-end gap-3;
+  }
+}
+
+@layer utilities {
+  .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+  
+  .backdrop-blur-apple {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+}
